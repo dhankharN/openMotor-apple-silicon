@@ -97,6 +97,40 @@ Once everything is set up, you can start openMotor by running: `python main.py` 
 
 ###### Note: On some systems, Python 2 and 3 are installed simultaneously, so you may have to specify which version to run when creating the venv. After the venv has been activated, the programs `python` and `pip` are aliased to the python runtime specific for your venv, so use those (instead of `pip3` and `python3`, on e.g. Debian Linux)
 
+### Native Apple Silicon app (M1 and later)
+
+On an Apple Silicon Mac, install native CPython 3.11 and the Xcode Command
+Line Tools (`xcode-select --install`), then run:
+
+```sh
+bash scripts/build-macos-arm64.sh
+```
+
+If `python3` points to a different version, select your native Python explicitly:
+
+```sh
+PYTHON=/path/to/python3.11 bash scripts/build-macos-arm64.sh
+```
+
+The script creates `.venv`, installs the tested versions in
+`requirements-macos-arm64.txt`, generates the Qt UI, compiles the Cython extension
+for ARM64, runs the unit tests, and packages `dist/openMotor.app` plus
+`dist/openMotor-macos-arm64.zip`. The app includes Python, Qt and the scientific
+libraries, so it runs without a separate Python installation or Rosetta.
+It can be moved to Applications and opened in Finder.
+
+The Mac requirements use scikit-image 0.22 rather than the older source-only
+0.18.3 dependency, and retain NumPy 1.x for the existing native extensions.
+The build verifies every bundled Mach-O binary is ARM64 and checks the app's
+ad-hoc signature. The app is not Developer ID signed or notarized; macOS may
+require approval in **System Settings > Privacy & Security** on another Mac.
+
+To run the source after building:
+
+```sh
+.venv/bin/python main.py
+```
+
 Data Files
 -----------
 

@@ -1,11 +1,13 @@
 import sys
 import os
+import matplotlib
+matplotlib.use('QtAgg')
 import matplotlib.pyplot as plt
 import matplotlib as mpl
 
 from PyQt6.QtWidgets import QApplication, QMessageBox
 from PyQt6.QtGui import QIcon
-from PyQt6.QtCore import Qt
+from PyQt6.QtCore import QEvent, QTimer, Qt
 
 import motorlib
 from motorlib import simResult
@@ -19,7 +21,7 @@ class App(QApplication):
     def __init__(self, args):
         super().__init__(args)
 
-        self.icon = QIcon(os.path.join(os.path.dirname(sys.argv[0]), 'resources/oMIconCyclesSmall.png'))
+        self.icon = QIcon(os.path.join(self.resourceRoot(), 'resources', 'oMIconCyclesSmall.png'))
 
         self.headless = '-h' in args
 
@@ -92,6 +94,29 @@ class App(QApplication):
                 self.window.ui.resultsWidget.setupGrainChecks(len(self.fileManager.getCurrentMotor().grains), False)
             self.window.show()
             logger.log('Window opened')
+
+    def resourceRoot(self):
+        if getattr(sys, 'frozen', False):
+            return sys._MEIPASS
+        return os.path.dirname(os.path.abspath(__file__))
+
+    def event(self, event):
+        # Finder delivers document opens as Apple events, including after launch.
+        if event.type() == QEvent.Type.FileOpen and event.file():
+            path = event.file()
+            QTimer.singleShot(0, lambda: self.openDocument(path))
+            return True
+        return super().event(event)
+
+    def openDocument(self, path):
+        if not hasattr(self, 'window'):
+            QTimer.singleShot(0, lambda: self.openDocument(path))
+            return
+        if self.fileManager.load(path):
+            self.fileManager.sendTitleUpdate()
+            motor = self.fileManager.getCurrentMotor()
+            self.window.getQuickResults(motor)
+            self.window.ui.resultsWidget.setupGrainChecks(len(motor.grains), False)
 
     def isDarkMode(self):
         if self.headless:
