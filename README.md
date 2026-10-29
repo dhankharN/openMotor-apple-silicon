@@ -38,8 +38,8 @@ Option 1: Using standard `pip` & `venv`
 The easiest way to build/run from source code is to clone the repository and install the required dependencies into a virtual environment:
 
 ```
-$ git clone https://github.com/reilleya/openMotor
-$ cd openMotor
+$ git clone https://github.com/dhankharN/openMotor-apple-silicon
+$ cd openMotor-apple-silicon
 $ python3 -m venv .venv
 $ source .venv/bin/activate
 $ pip install -r requirements.txt
@@ -50,8 +50,8 @@ Option 2: Using `uv`
 The fastest way to set up the development environment:
 
 ```
-$ git clone https://github.com/reilleya/openMotor
-$ cd openMotor
+$ git clone https://github.com/dhankharN/openMotor-apple-silicon
+$ cd openMotor-apple-silicon
 $ uv sync
 ```
 
@@ -99,14 +99,11 @@ Once everything is set up, you can start openMotor by running: `python main.py` 
 
 ### Native Apple Silicon app (M1 and later)
 
-This build is in this repository, not in the upstream clone used above. On an
-Apple Silicon Mac, install native CPython 3.11 (not 3.10 or 3.12) and the Xcode
-Command Line Tools (`xcode-select --install`). Python must be running as arm64,
-not under Rosetta. Then:
+On an Apple Silicon Mac, install native CPython 3.11 (not 3.10 or 3.12) and the
+Xcode Command Line Tools (`xcode-select --install`). Python must be running as
+arm64, not under Rosetta. From this repository, run:
 
 ```sh
-git clone https://github.com/dhankharN/openMotor-apple-silicon
-cd openMotor-apple-silicon
 bash scripts/build-macos-arm64.sh
 ```
 
