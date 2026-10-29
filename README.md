@@ -26,7 +26,7 @@ The calculations involved were sourced from Rocket Propulsion Elements by George
 Download
 -------
 
-You can download the latest version for your system [here](https://github.com/reilleya/openMotor/releases/latest). From there, just unzip the file and run it. Alternatively, you can run it from source code to get the latest features. openMotor is avaliable on the AUR as `openmotor` and on debian apt as `openmotor`
+Upstream releases are [here](https://github.com/reilleya/openMotor/releases/latest). This repository does not publish those binaries. Its Apple Silicon app is produced locally by `scripts/build-macos-arm64.sh`, described below. openMotor is avaliable on the AUR as `openmotor` and on debian apt as `openmotor`
 
 Building from Source
 --------------------
@@ -99,33 +99,39 @@ Once everything is set up, you can start openMotor by running: `python main.py` 
 
 ### Native Apple Silicon app (M1 and later)
 
-On an Apple Silicon Mac, install native CPython 3.11 and the Xcode Command
-Line Tools (`xcode-select --install`), then run:
+This build is in this repository, not in the upstream clone used above. On an
+Apple Silicon Mac, install native CPython 3.11 (not 3.10 or 3.12) and the Xcode
+Command Line Tools (`xcode-select --install`). Python must be running as arm64,
+not under Rosetta. Then:
 
 ```sh
+git clone https://github.com/dhankharN/openMotor-apple-silicon
+cd openMotor-apple-silicon
 bash scripts/build-macos-arm64.sh
 ```
 
-If `python3` points to a different version, select your native Python explicitly:
+If `python3` is not CPython 3.11, select it explicitly:
 
 ```sh
 PYTHON=/path/to/python3.11 bash scripts/build-macos-arm64.sh
 ```
 
-The script creates `.venv`, installs the tested versions in
+The script creates or reuses `.venv`, installs the pinned versions in
 `requirements-macos-arm64.txt`, generates the Qt UI, compiles the Cython extension
-for ARM64, runs the unit tests, and packages `dist/openMotor.app` plus
-`dist/openMotor-macos-arm64.zip`. The app includes Python, Qt and the scientific
-libraries, so it runs without a separate Python installation or Rosetta.
-It can be moved to Applications and opened in Finder.
+for arm64, runs the unit tests, and writes `dist/openMotor.app` and
+`dist/openMotor-macos-arm64.zip`. The app bundles Python, Qt, and the scientific
+libraries. Minimum system version is macOS 12. It can be copied to Applications
+and opened from Finder on the Mac that built it.
 
-The Mac requirements use scikit-image 0.22 rather than the older source-only
-0.18.3 dependency, and retain NumPy 1.x for the existing native extensions.
-The build verifies every bundled Mach-O binary is ARM64 and checks the app's
-ad-hoc signature. The app is not Developer ID signed or notarized; macOS may
-require approval in **System Settings > Privacy & Security** on another Mac.
+`requirements.txt` pins scikit-image 0.18.3, which has Intel macOS wheels but no
+Python 3.11 arm64 wheel. The Mac build uses scikit-image 0.22.0 instead, and
+NumPy 1.26.4 so the Cython extension and scikit-fmm keep their current ABI.
+The build rejects any bundled Mach-O file that is not arm64-only and checks the
+app's ad-hoc signature. It is not Developer ID signed or notarized. A copy that
+macOS quarantines, such as a downloaded zip, can be approved in
+**System Settings > Privacy & Security**.
 
-To run the source after building:
+After the script succeeds, run the source tree with:
 
 ```sh
 .venv/bin/python main.py
